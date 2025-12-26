@@ -434,9 +434,9 @@ if __name__ == "__main__":
     # 初始化模型
     print("Initializing VGTAE_InternVL3 model...")
     model = VGTAE_InternVL3(
-        mllm_path = "/mmu-vcg-hdd/guojiahao/pretrain/OpenGVLab/InternVL3-1B",
-        dc_ae_path = "/mmu-vcg-hdd/guojiahao/pretrain/mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers",
-        checkpoint_path = "/mmu-vcg-hdd/guojiahao/OpenUni/src/models/vae/tokenizer/checkpoints/vlvae_intervl3_p14_448px_stage2_sft/checkpoint-15000/unwrapped_model/pytorch_model.bin",
+        mllm_path = "OpenGVLab/InternVL3-1B",
+        dc_ae_path = "mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers",
+        checkpoint_path = "./pytorch_model.bin", # from https://huggingface.co/hustvl/vgt_internvl3_1_6B_pretrain 
         encoder_norm=True,
         device=device,
         dtype=torch.bfloat16
@@ -453,7 +453,7 @@ if __name__ == "__main__":
     ])
     
     # 读取测试图像
-    test_image_path = "/mmu-vcg-hdd/guojiahao/OpenUni/test.jpeg"
+    test_image_path = "./OpenUni/test.jpeg"
     if not os.path.exists(test_image_path):
         print(f"Error: Test image not found at {test_image_path}")
         exit(1)

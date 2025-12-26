@@ -38,6 +38,7 @@ model = dict(
         type = "vgt_pretrain", #use pretrain vgt-ae
         mllm_path = "OpenGVLab/InternVL3-1B",
         dc_ae_path = "mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers",
+        # checkpoint_path = "./pytorch_model.bin", # from https://huggingface.co/hustvl/vgt_internvl3_1_6B_pretrain extract
         encoder_norm=True,
     ),
     
