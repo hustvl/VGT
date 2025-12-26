@@ -42,7 +42,7 @@ model = dict(
         encoder_norm=True,
     ),
     
-    # custom train ae
+    # custom train ae in ./tokenizer
     # vgt_ae = dict(
     #     config_path = "tokenizer/configs/vgtae_intervl3/vlvae_intervl3_p28_448px_stage2.yaml",
     #     checkpoint_path = "tokenizer/checkpoints/VGTAE_intervl3_stage2/checkpoint-50000/unwrapped_model/pytorch_model.bin"
