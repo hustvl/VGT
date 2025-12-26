@@ -157,8 +157,8 @@ class VLVAE_Qwen2_5_Tokenizer(nn.Module):
     """
     
     def __init__(self, 
-                 mllm_path: str = "/mmu-vcg-hdd/guojiahao/pretrain/Qwen/Qwen2.5-VL-3B-Instruct",
-                 dc_ae_path: str = "/mmu-vcg-hdd/guojiahao/pretrain/mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers",
+                 mllm_path: str = "/path/to/pretrain/Qwen/Qwen2.5-VL-3B-Instruct",
+                 dc_ae_path: str = "/path/to/pretrain/mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers",
                  checkpoint_path: Optional[str] = None,
                  embed_dim: int = 32,
                  encoder_norm: bool = False,
@@ -454,11 +454,11 @@ class VLVAE_QWEN2_5_Stage2(BaseModel, PyTorchModelHubMixin, VLVAE_Qwen2_5_Tokeni
         model_config = config.model
         
         # 初始化父类VLVAE_Qwen2_5_Tokenizer
-        mllm_path = getattr(model_config, 'mllm_path', "/mmu-vcg-hdd/guojiahao/pretrain/Qwen/Qwen2.5-VL-3B-Instruct")
+        mllm_path = getattr(model_config, 'mllm_path', "/path/to/pretrain/Qwen/Qwen2.5-VL-3B-Instruct")
         VLVAE_Qwen2_5_Tokenizer.__init__(
             self,
             mllm_path=mllm_path,
-            dc_ae_path=getattr(model_config, 'dc_ae_path', "/mmu-vcg-hdd/guojiahao/pretrain/mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers"),
+            dc_ae_path=getattr(model_config, 'dc_ae_path', "/path/to/pretrain/mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers"),
             checkpoint_path=getattr(model_config, 'checkpoint_path', None),
             embed_dim=getattr(model_config, 'embed_dim', 32),
             encoder_norm=getattr(model_config, 'encoder_norm', False),

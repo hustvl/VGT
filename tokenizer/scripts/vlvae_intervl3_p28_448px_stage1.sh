@@ -10,7 +10,7 @@ export TORCH_DISTRIBUTED_DEBUG="INFO"
 
 config_file=./configs/vgtae_intervl3/vlvae_intervl3_p28_448px_stage1.yaml
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 /mmu-vcg-hdd/guojiahao/miniconda3/envs/openuni-12.3/bin/torchrun \
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 /path/to/miniconda3/envs/VGT-12.3/bin/torchrun \
     --nproc_per_node=$NUM_GPUS_PER_NODE \
     --nnodes=$NUM_NODES \
     --node_rank=0 \

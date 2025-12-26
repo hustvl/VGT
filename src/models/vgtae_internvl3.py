@@ -453,7 +453,7 @@ if __name__ == "__main__":
     ])
     
     # 读取测试图像
-    test_image_path = "./OpenUni/test.jpeg"
+    test_image_path = "./VGT/test.jpeg"
     if not os.path.exists(test_image_path):
         print(f"Error: Test image not found at {test_image_path}")
         exit(1)

@@ -1,8 +1,8 @@
 import torch
 import os
-# /mmu-vcg-hdd/guojiahao/miniconda3/envs/openuni-12.3/bin/python /mmu-vcg-hdd/guojiahao/OpenUni/src/models/vae/tokenizer/scripts/ckpt/covert_to_pth.py
+# /path/to/miniconda3/envs/VGT-12.3/bin/python /path/to/VGT/src/models/vae/tokenizer/scripts/ckpt/covert_to_pth.py
 # ==== 配置路径 ====
-bin_path = "/mmu-vcg-hdd/guojiahao/OpenUni/src/models/vae/tokenizer/checkpoints/vlvae_qwen/vlvae_qwen2_5_p14_448px_stage2/checkpoint-35000/unwrapped_model/pytorch_model.bin"
+bin_path = "/path/to/VGT/src/models/vae/tokenizer/checkpoints/vlvae_qwen/vlvae_qwen2_5_p14_448px_stage2/checkpoint-35000/unwrapped_model/pytorch_model.bin"
 pth_path = os.path.splitext(bin_path)[0] + ".pth"
 
 # ==== 加载并保存 ====

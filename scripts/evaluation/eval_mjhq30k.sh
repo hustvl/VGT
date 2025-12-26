@@ -21,13 +21,13 @@ IMAGE_SIZE=1024
 
 # Configure models to evaluate (arrays must have same length)
 declare -a CONFIGS=(
-    "./configs/models/openuni_b_internvl3_1b_sana_0_6b_512_hf.py"
+    "./configs/models/VGT_b_internvl3_1b_sana_0_6b_512_hf.py"
     # Add more configs here
     # "./configs/models/model2.py"
 )
 
 declare -a CHECKPOINTS=(
-    "work_dirs/openuni_model/iter_10000.pth"
+    "work_dirs/VGT_model/iter_10000.pth"
     # Add corresponding checkpoints here
     # "work_dirs/model2/iter_20000.pth"
 )

@@ -117,7 +117,7 @@ def main():
     # CONFIG = "configs/VGT_qwen2_5vl/vgt_qwen2_5vl_2B_448px.py"
 
     ###############VGT InterVL3########################
-    CPKT_PATH = "/mmu-vcg-hdd/guojiahao/VGT/ckpts/vgt_internvl3_1_6B_sft/iter_5000.pth"
+    CPKT_PATH = "/path/to/VGT/ckpts/vgt_internvl3_1_6B_sft/iter_5000.pth"
     CONFIG = "configs/models/vgt_internvl3_1_6B_448px.py"
     
     # default
