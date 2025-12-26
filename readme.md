@@ -185,6 +185,9 @@ Download the sft model checkpoint:
 ```bash
 cd VGT
 mkdir ckpts
+
+hf download hustvl/vgt_ae --repo-type model --local-dir ckpts/vgt_ae
+
 hf download hustvl/vgt_qwen25vl_2B_sft --repo-type model --local-dir ckpts/hustvl/vgt_qwen25vl_2B_sft
 hf download hustvl/vgt_internvl3_1_6B_sft --repo-type model --local-dir ckpts/hustvl/vgt_internvl3_1_6B_sft
 ```

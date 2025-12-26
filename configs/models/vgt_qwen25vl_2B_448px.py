@@ -37,6 +37,7 @@ model = dict(
         type = "vgt_pretrain",
         mllm_path = qwen2_5_vl_model_name_or_path,
         dc_ae_path = dcae_path,
+        checkpoint_path = "ckpts/vgt_ae/vgt_ae_qwen25vl.pth",
         encoder_norm=True,
     ),
 

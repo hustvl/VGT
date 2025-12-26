@@ -38,7 +38,7 @@ model = dict(
         type = "vgt_pretrain",
         mllm_path = "OpenGVLab/InternVL3-1B",
         dc_ae_path = "mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers",
-        # checkpoint_path = "./pytorch_model.bin", # from https://huggingface.co/hustvl/vgt_internvl3_1_6B_pretrain extract
+        checkpoint_path = "ckpts/vgt_ae/vgt_ae_internvl3.pth",
         encoder_norm=True,
     ),
 
@@ -47,7 +47,7 @@ model = dict(
     #     config_path = "tokenizer/configs/vgtae_intervl3/vlvae_intervl3_p28_448px_stage2.yaml",
     #     checkpoint_path = "tokenizer/checkpoints/VGTAE_intervl3_stage2/checkpoint-50000/unwrapped_model/pytorch_model.bin"
     # ),
-
+    
     # Tokenizer and prompt
     tokenizer=tokenizer,
     prompt_template=prompt_template,
