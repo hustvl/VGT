@@ -1,0 +1,13 @@
+*.pyc
+# Python
+*__pycache__/*
+*.py[cod]
+*$py.class
+*.so
+
+data
+eval
+save_fig
+work_dirs
+scripts/train_ddp.sh
+swanlog

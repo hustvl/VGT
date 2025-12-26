@@ -1,0 +1,130 @@
+import json
+import os
+import copy
+import torch
+import argparse
+from tqdm import tqdm
+from xtuner.registry import BUILDER
+from mmengine.config import Config
+from xtuner.model.utils import guess_load_checkpoint
+from accelerate import Accelerator
+from accelerate.utils import gather_object
+from torch.utils.data import Dataset, DataLoader
+from PIL import Image
+from einops import rearrange
+from glob import glob
+from src.utils import load_checkpoint_with_ema
+
+class DPGBench(Dataset):
+    def __init__(self, data_path):
+        self.data = sorted(glob(f'{data_path}/*.txt'))
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        text_file = self.data[idx]
+        name = os.path.basename(text_file)[:-4]   # .txt
+        with open(text_file, 'r') as f:
+            text = f.readline()
+
+        data_dict = dict(name=name, text=text)
+
+        return data_dict
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('config', help='config file path.')
+    parser.add_argument('--checkpoint', default=None, type=str)
+    parser.add_argument('--batch_size', default=16, type=int)
+    parser.add_argument('--data', default='./data/ELLA/dpg_bench/prompts', type=str)
+    parser.add_argument('--output', default='output', type=str)
+    parser.add_argument("--cfg_prompt", type=str, default=None)
+    parser.add_argument("--cfg_scale", type=float, default=4.5)
+    parser.add_argument("--total_step", type=int, default=1000000)
+    parser.add_argument('--num_steps', type=int, default=100)
+    parser.add_argument("--height", type=int, default=448)
+    parser.add_argument("--width", type=int, default=448)
+    parser.add_argument("--seed", type=int, default=42)
+
+    args = parser.parse_args()
+
+    accelerator = Accelerator()
+    # each GPU creates a string
+    message = [f"Hello this is GPU {accelerator.process_index}"]
+    # collect the messages from all GPUs
+    messages = gather_object(message)
+    # output the messages only on the main process with accelerator.print()
+    accelerator.print(f"Number of gpus: {accelerator.num_processes}")
+    accelerator.print(messages)
+
+    config = Config.fromfile(args.config)
+
+    print(f'Device: {accelerator.device}', flush=True)
+
+    dataset = DPGBench(data_path=args.data)
+    dataloader = DataLoader(dataset=dataset,
+                            batch_size=args.batch_size,
+                            shuffle=False,
+                            drop_last=False,
+                            collate_fn=lambda x: x
+                            )
+
+    model = BUILDER.build(config.model)
+    if args.checkpoint is not None:
+        load_checkpoint_with_ema(model, args.checkpoint, use_ema=True, map_location='cpu', strict=False)
+    model = model.to(device=accelerator.device)
+    model = model.to(model.dtype)
+    model.eval()
+
+    dataloader = accelerator.prepare(dataloader)
+
+    print(f'Number of samples: {len(dataloader)}', flush=True)
+
+    if args.cfg_prompt is None:
+        cfg_prompt = model.prompt_template['CFG']
+    else:
+        cfg_prompt = model.prompt_template['GENERATION'].format(input=args.cfg_prompt.strip())
+    cfg_prompt = model.prompt_template['INSTRUCTION'].format(input=cfg_prompt)
+    # if model.prompt_template.get('IMG_START_TOKEN_FOR_GENERATION', True):
+    #     cfg_prompt += model.prompt_template['IMG_START_TOKEN']
+
+    if accelerator.is_main_process:
+        os.makedirs(args.output, exist_ok=True)
+
+    generator = torch.Generator(device=model.device).manual_seed(args.seed)
+
+    for batch_idx, data_samples in tqdm(enumerate(dataloader), disable=not accelerator.is_main_process):
+        device_idx = accelerator.process_index
+
+        prompts = []
+        for data_sample in data_samples:
+            prompt = copy.deepcopy(data_sample['text'].strip())
+            # prompt = model.prompt_template['GENERATION'].format(input=prompt)
+            # prompt = model.prompt_template['INSTRUCTION'].format(input=prompt)
+            # if model.prompt_template.get('IMG_START_TOKEN_FOR_GENERATION', True):
+            #     prompt += model.prompt_template['IMG_START_TOKEN']
+            prompts.append(prompt)
+
+        prompts = prompts * 4
+        # prompts = prompts + len(prompts) * [cfg_prompt]
+
+        # inputs = model.tokenizer(
+        #     prompts, add_special_tokens=True, return_tensors='pt', padding=True).to(accelerator.device)
+        inputs = model.prepare_batch_text_conditions(prompts)
+
+        images = model.generate(**inputs, progress_bar=False,
+                                cfg_scale=args.cfg_scale, num_steps=args.num_steps,
+                                generator=generator, height=args.height, width=args.width, total_step=args.total_step)
+
+        print(images.shape)
+        images = rearrange(images, '(m n b) c h w -> b (m h) (n w) c', m=2, n=2)
+
+        images = torch.clamp(
+            127.5 * images + 128.0, 0, 255).to("cpu", dtype=torch.uint8).numpy()
+
+        # Save samples to disk as individual .png files
+        for image, data_sample in zip(images, data_samples):
+            name = data_sample['name']
+            Image.fromarray(image).save(f"{args.output}/{name}.png")
