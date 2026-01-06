@@ -1,1 +1,1 @@
-from .quantizer import VectorQuantizer, DiagonalGaussianDistribution, LatentRegularizer, IndexPropagationQuantize
+from .quantizer import VectorQuantizer, DiagonalGaussianDistribution

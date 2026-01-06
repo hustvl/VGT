@@ -5,7 +5,6 @@
 *$py.class
 *.so
 
-data
 eval
 save_fig
 work_dirs
