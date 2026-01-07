@@ -26,7 +26,7 @@ from collections import defaultdict
 import open_clip
 from tqdm.auto import tqdm
 
-from data import RecDataset, SimpleImageDataset
+from data import SimpleImageDataset
 import torch
 from torch.utils.data import DataLoader
 from omegaconf import OmegaConf

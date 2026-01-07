@@ -5,7 +5,6 @@
 *$py.class
 *.so
 
-eval
 save_fig
 work_dirs
 scripts/train_ddp.sh
