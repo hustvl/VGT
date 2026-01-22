@@ -34,18 +34,16 @@ model = dict(
             timeshift=1.4, # √32(latent)/16(base)
     ),
     
+    # VGT-AE-Pretrain
     vgt_ae = dict(
-        type = "vgt_pretrain",
-        mllm_path = "OpenGVLab/InternVL3-1B",
-        dc_ae_path = "mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers",
+        config_path = "tokenizer/configs/vgtae_intervl3/vlvae_intervl3_p28_448px_stage2.yaml",
         checkpoint_path = "ckpts/vgt_ae/vgt_ae_internvl3.pth",
-        encoder_norm=True,
     ),
-
+    
     # custom train ae in ./tokenizer
     # vgt_ae = dict(
     #     config_path = "tokenizer/configs/vgtae_intervl3/vlvae_intervl3_p28_448px_stage2.yaml",
-    #     checkpoint_path = "tokenizer/checkpoints/VGTAE_intervl3_stage2/checkpoint-50000/unwrapped_model/pytorch_model.bin"
+    #     checkpoint_path = "tokenizer/checkpoints/vlvae_intervl3_p28_448px_stage2_4/checkpoint-90000/unwrapped_model/pytorch_model.binh"
     # ),
     
     # Tokenizer and prompt

@@ -150,7 +150,6 @@ class VLVAE_interVL3_Tokenizer(nn.Module):
     def __init__(self, 
                  mllm_path: str = "/path/to/pretrain/OpenGVLab/InternVL3-1B",
                  dc_ae_path: str = "/path/to/pretrain/mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers",
-                 checkpoint_path: Optional[str] = None,
                  embed_dim: int = 32,
                  encoder_norm: bool = False,
                  max_noise_strength: float = 0.1,
@@ -223,9 +222,6 @@ class VLVAE_interVL3_Tokenizer(nn.Module):
         # 初始化权重
         self._init_weights()
         del model
-        # 5. 加载预训练权重
-        if checkpoint_path:
-            self.load_checkpoint(checkpoint_path)
                     
     def _init_weights(self):
         """初始化新增模块的权重"""
@@ -237,15 +233,7 @@ class VLVAE_interVL3_Tokenizer(nn.Module):
                         m.bias.data.zero_()
                 elif isinstance(m, nn.LayerNorm):
                     m.bias.data.zero_()
-                    m.weight.data.fill_(1.0)
-    
-    def load_checkpoint(self, checkpoint_path: str):
-        """加载预训练权重"""
-        print(f"Loading checkpoint from {checkpoint_path}")
-        checkpoint = torch.load(checkpoint_path, map_location="cpu")
-        msg = self.load_state_dict(checkpoint, strict=False)
-        print(f"Loaded checkpoint: {msg}")
-    
+                    m.weight.data.fill_(1.0)    
 
     def get_semantic_features(self, encoder, mlp,  x):
         if x.min() < 0.0: #[-1,1]
@@ -296,7 +284,6 @@ class VLVAE_interVL3_Tokenizer(nn.Module):
         vit_embeds = vit_embeds.view(b, c, int(math.sqrt(hw)), int(math.sqrt(hw)))
 
         vit_embeds = vit_embeds.float()*self.scale_embeding
-
 
         result_dict = {}
         if self.kl:
@@ -410,13 +397,11 @@ class VLVAE_InterVL3_Train(BaseModel, PyTorchModelHubMixin, VLVAE_interVL3_Token
             self,
             mllm_path=mllm_path,
             dc_ae_path=getattr(model_config, 'dc_ae_path', "/path/to/pretrain/mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers"),
-            checkpoint_path=getattr(model_config, 'checkpoint_path', None),
             embed_dim=getattr(model_config, 'embed_dim', 32),
             encoder_norm=getattr(model_config, 'encoder_norm', False),
             max_noise_strength=getattr(model_config, 'max_noise_strength', 0.0),
             scale_embeding=getattr(model_config, 'scale_embeding', 1.0),
             kl=getattr(model_config, 'kl', False),
-            # stage1_ckpt=getattr(model_config, 'stage1_ckpt', 1.0),
         )
 
         # 保存config
@@ -425,10 +410,17 @@ class VLVAE_InterVL3_Train(BaseModel, PyTorchModelHubMixin, VLVAE_interVL3_Token
         
         self.to(torch.bfloat16)
         # 如果有stage1_ckpt，加载预训练权重
-        if hasattr(model_config, 'stage1_ckpt') and model_config.stage1_ckpt != '':
-            msg = self.load_state_dict(torch.load(model_config.stage1_ckpt), strict=False)
+        if hasattr(model_config, 'checkpoint_path') and model_config.checkpoint_path != '':
+            print(f"Loading checkpoint from {model_config.checkpoint_path}")
+            checkpoint = torch.load(model_config.checkpoint_path, map_location="cpu")
+            if "state_dict" in checkpoint:
+                msg = self.load_state_dict(checkpoint["state_dict"], strict=False)
+            else:
+                msg = self.load_state_dict(checkpoint, strict=False)
+            print(f"Loaded checkpoint: {msg}")
+            
             if is_main_process():
-                print(f"load {model_config.stage1_ckpt}")
+                print(f"load {model_config.checkpoint_path}")
                 print("Missing keys:", msg.missing_keys)
                 print("Unexpected keys:", msg.unexpected_keys)
 

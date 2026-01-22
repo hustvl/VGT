@@ -1,38 +1,36 @@
 experiment:
-  project: VGTAE_intervl3
-  name: VGTAE_intervl3_stage1
-  output_dir: checkpoints/VGTAE_intervl3_stage1
+  project: VGTAE_intervl3_github
+  name: vlvae_intervl3_p28_448px_stage1
+  output_dir: checkpoints/vlvae_intervl3_p28_448px_stage1
   max_train_examples: 1_281_167
-  save_every: 5_000
-  eval_every: 5_000
-  generate_every: 1_000
+  save_every: 10_000
+  eval_every: 10_000
+  generate_every: 5_000
   log_every: 50
   log_grad_norm_every: 500
   resume: True
   init_weight: ""
 
-
 model:
   name: VLVAE_InterVL3_Train
-  stage1_ckpt: ''
+  checkpoint_path: ''
   mllm_path: "OpenGVLab/InternVL3-1B"
   dc_ae_path: "mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers"
   embed_dim: 32
   encoder_norm: False
-  kl: True
   max_noise_strength: 0.0
   scale_embeding: 1.0
 
 losses:
   name: VGTAE_ReconstructionLoss
-  discriminator_start: 30000
+  discriminator_start: 30_000
   quantizer_weight: 1.0
   discriminator_factor: 1.0
   discriminator_weight: 0.1
   perceptual_loss: lpips-convnext_s-1.0-0.1
   perceptual_weight: 1.1
   distill_weight: 1.0
-  reconstruction_loss: "l1"
+  reconstruction_loss: "l2"
   reconstruction_weight: 1.0
   lecam_regularization_weight: 0.001
   kl_weight: 1e-6
@@ -52,16 +50,15 @@ dataset:
     normalize_std: [0.5, 0.5, 0.5]
     imagenet_norm: True
 
-
 optimizer:
   name: adamw 
   params:
-    learning_rate: 2e-4
-    discriminator_learning_rate: 2e-4
+    learning_rate: 3e-4
+    discriminator_learning_rate: 3e-4
     beta1: 0.9
     beta2: 0.95
     weight_decay: 1e-4
-  encoder_lr_muti: 0.1
+  encoder_lr_muti: 0.5
 
 lr_scheduler:
   scheduler: cosine

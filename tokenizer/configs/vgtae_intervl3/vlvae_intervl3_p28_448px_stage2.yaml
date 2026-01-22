@@ -1,11 +1,11 @@
 experiment:
-  project: VGTAE_intervl3
-  name: vlvae_intervl3_p28_448px_stage2_GAN
-  output_dir: checkpoints/vlvae_intervl3_p28_448px_stage2_GAN
+  project: VGTAE_intervl3_github
+  name: vlvae_intervl3_p28_448px_stage2
+  output_dir: checkpoints/vlvae_intervl3_p28_448px_stage2
   max_train_examples: 1_281_167
-  save_every: 5_000
-  eval_every: 5_000
-  generate_every: 1_000
+  save_every: 10_000
+  eval_every: 10_000
+  generate_every: 5_000
   log_every: 50
   log_grad_norm_every: 500
   resume: True
@@ -13,25 +13,24 @@ experiment:
 
 model:
   name: VLVAE_InterVL3_Train
-  stage1_ckpt: "./checkpoints/VGTAE_intervl3_stage1/checkpoint-100000/unwrapped_model/pytorch_model.bin"
+  checkpoint_path: "checkpoints/vlvae_intervl3_p28_448px_stage1/checkpoint-100000/unwrapped_model/pytorch_model.bin"
   mllm_path: "OpenGVLab/InternVL3-1B"
   dc_ae_path: "mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers"
   embed_dim: 32
   encoder_norm: True
-  kl: True
   max_noise_strength: 0.1
   scale_embeding: 1.0
 
 losses:
   name: VGTAE_ReconstructionLoss
-  discriminator_start: 30000
+  discriminator_start: 10000
   quantizer_weight: 1.0
   discriminator_factor: 1.0
   discriminator_weight: 0.1
   perceptual_loss: lpips-convnext_s-1.0-0.1
   perceptual_weight: 1.1
-  distill_weight: 1.0
-  reconstruction_loss: "l1"
+  distill_weight: 0.1
+  reconstruction_loss: "l2"
   reconstruction_weight: 1.0
   lecam_regularization_weight: 0.001
   kl_weight: 1e-6
@@ -59,15 +58,14 @@ optimizer:
     beta1: 0.9
     beta2: 0.95
     weight_decay: 1e-4
-  encoder_lr_muti: 0.1
+  encoder_lr_muti: 0.5
 
 lr_scheduler:
   scheduler: cosine
   params:
     learning_rate: ${optimizer.params.learning_rate}
     warmup_steps: 3000
-    end_lr: 1e-4
-
+    end_lr: 1e-5
 
 training:
   ddp_find_unused_parameters: True
@@ -79,6 +77,6 @@ training:
   wandb_api_key: xxxxxxxxxxxx
   use_ema: False
   seed: 42
-  max_train_steps: 80000
+  max_train_steps: 100_000
   num_generated_images: 8
   max_grad_norm: 1.0

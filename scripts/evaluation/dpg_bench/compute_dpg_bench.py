@@ -28,7 +28,7 @@ def parse_args():
     parser.add_argument(
         "--csv",
         type=str,
-        default='/path/to/VGT/scripts/evaluation/dpg_bench/dpg_bench.csv',
+        default='./scripts/evaluation/dpg_bench/dpg_bench.csv',
     )
     parser.add_argument(
         "--res-path",

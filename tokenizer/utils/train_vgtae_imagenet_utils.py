@@ -21,6 +21,7 @@ import math
 import wandb
 from pathlib import Path
 import pprint
+import torch.nn.functional as F
 import glob
 from collections import defaultdict
 import open_clip
@@ -573,7 +574,6 @@ def eval_reconstruction(
 
     eval_batch_size = None
     eval_buffer_size = 4
-    eval_steps = 40
     step_idx = 0
 
     all_original_images = []
@@ -581,7 +581,6 @@ def eval_reconstruction(
 
     eval_progress_bar = tqdm(
         eval_loader,
-        total=eval_steps,
         desc=f"Evaluation",
         disable=not accelerator.is_local_main_process,
     )
@@ -608,7 +607,11 @@ def eval_reconstruction(
         original_images = (original_images - mean) / std
         # reconstructed_images = reconstructed_images * std + mean
         reconstructed_images = torch.clamp(reconstructed_images, -1.0, 1.0)
-
+        
+        # fix 256 eval
+        reconstructed_images = F.interpolate(reconstructed_images, size=(256, 256), mode='bilinear').to(torch.float32)
+        original_images = F.interpolate(original_images, size=(256, 256), mode='bilinear').to(torch.float32)
+        
         all_original_images.append(original_images.cpu())
         all_reconstructed_images.append(reconstructed_images.cpu())
 
@@ -620,10 +623,6 @@ def eval_reconstruction(
 
         eval_progress_bar.update(1)
         step_idx += 1
-
-        if step_idx >= eval_steps:
-            break
-
 
     if len(all_original_images) > 0:
         _process_buffer(all_original_images, all_reconstructed_images, accelerator, evaluator, eval_batch_size)

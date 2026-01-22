@@ -210,7 +210,7 @@ def main():
                         help='Path to model checkpoint file')
     parser.add_argument('--batch_size', type=int, default=32,
                         help='Batch size')
-    parser.add_argument('--model_image_size', type=int, default=512,
+    parser.add_argument('--model_image_size', type=int, default=448,
                         help='Model input image size')
     parser.add_argument('--eval_image_size', type=int, default=256,
                         help='Evaluation image size')
