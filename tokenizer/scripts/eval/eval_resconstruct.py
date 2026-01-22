@@ -44,7 +44,7 @@ from datasets import load_dataset
 from modeling.modules import EMAModel, loss_map
 from modeling import model_map
 
-def load_rqae_model(config_path, checkpoint_path, accelerator):
+def load_ae_model(config_path, checkpoint_path, accelerator):
     """Load RQAE model for image reconstruction evaluation
     
     Args:
@@ -135,7 +135,7 @@ class HuggingFaceImageNetDataset(Dataset):
             split="validation", 
             use_auth_token=use_auth_token
         )
-        
+
         # Convert streaming dataset to list for indexing
         self.data_list = list(self.dataset)
     
@@ -237,7 +237,7 @@ def main():
     # Load model
     accelerator.print(f"Loading model config: {args.config_path}")
     accelerator.print(f"Loading model checkpoint: {args.checkpoint_path}")
-    model = load_rqae_model(args.config_path, args.checkpoint_path, accelerator)
+    model = load_ae_model(args.config_path, args.checkpoint_path, accelerator)
     
     # Create dataset and dataloader
     accelerator.print(f"Loading ImageNet validation dataset from HuggingFace")
