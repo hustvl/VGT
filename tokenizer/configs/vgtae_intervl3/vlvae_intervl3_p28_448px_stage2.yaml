@@ -38,7 +38,7 @@ losses:
 
 dataset:
   params:
-    train_shards_path_or_url: "datacomp_sharded/train/datacomp-train-{000000..140089}.tar"
+    train_shards_path_or_url: "imagenet_sharded/train/imagenet-train-{0000..0252}.tar"
     eval_shards_path_or_url: "imagenet_sharded/val/imagenet-val-{0000..0009}.tar"
     num_workers_per_gpu: 12
   preprocessing:
