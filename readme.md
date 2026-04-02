@@ -21,7 +21,7 @@ Kun Gai⁴, Chun Yuan², Kai Wu⁴†, Xinggang Wang¹✉
 
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![authors](https://img.shields.io/badge/by-hustvl-green)](https://github.com/hustvl)
-[![model](https://img.shields.io/badge/🤗-VGT_Qwen2.5VL_2B-yellow)](https://huggingface.co/hustvl/vgt_qwen2.5vl_1_6B_sft)
+[![model](https://img.shields.io/badge/🤗-VGT_Qwen2.5VL_1.6B-yellow)](https://huggingface.co/hustvl/vgt_qwen25vl_1_6B_sft)
 [![model](https://img.shields.io/badge/🤗-VGT_InternVL3_1.6B-yellow)](https://huggingface.co/hustvl/vgt_internvl3_1_6B_sft)
 [![paper](https://img.shields.io/badge/arXiv-Paper-red)](https://arxiv.org/abs/2511.23469)
 
@@ -175,8 +175,8 @@ We provide VGT-tuned models based on Qwen2.5-VL and InternVL3 (448px):
 |:------|:-----------|:-------:|:---------:|:--------:|
 | VGT-InternVL3-1.6B-Pretrain | InternVL3-1.6B | 0.58 | 73.05 | [🤗 HuggingFace](https://huggingface.co/hustvl/vgt_internvl3_1_6B_pretrain) |
 | VGT-InternVL3-1.6B-SFT | InternVL3-1.6B | 0.82 | 76.33 | [🤗 HuggingFace](https://huggingface.co/hustvl/vgt_internvl3_1_6B_sft) |
-| VGT-Qwen2.5-VL-2B-Pretrain | Qwen2.5-VL-2B | 0.63 | 78.02 | [🤗 HuggingFace](https://huggingface.co/hustvl/vgt_qwen25vl_2B_pretrain) |
-| VGT-Qwen2.5-VL-2B-SFT | Qwen2.5-VL-2B | 0.83 | 81.28 | [🤗 HuggingFace](https://huggingface.co/hustvl/vgt_qwen25vl_2B_sft) |
+| VGT-Qwen2.5-VL-1.6B-Pretrain | Qwen2.5-VL-1.6B | 0.63 | 78.02 | [🤗 HuggingFace](https://huggingface.co/hustvl/vgt_qwen25vl_1_6B_pretrain) |
+| VGT-Qwen2.5-VL-1.6B-SFT | Qwen2.5-VL-1.6B | 0.83 | 81.28 | [🤗 HuggingFace](https://huggingface.co/hustvl/vgt_qwen25vl_1_6B_sft) |
 
 ### Inference
 
@@ -188,7 +188,7 @@ mkdir ckpts
 
 hf download hustvl/vgt_ae --repo-type model --local-dir ckpts/vgt_ae
 
-hf download hustvl/vgt_qwen25vl_2B_sft --repo-type model --local-dir ckpts/hustvl/vgt_qwen25vl_2B_sft
+hf download hustvl/vgt_qwen25vl_1_6B_sft --repo-type model --local-dir ckpts/hustvl/vgt_qwen25vl_1_6B_sft
 hf download hustvl/vgt_internvl3_1_6B_sft --repo-type model --local-dir ckpts/hustvl/vgt_internvl3_1_6B_sft
 ```
 

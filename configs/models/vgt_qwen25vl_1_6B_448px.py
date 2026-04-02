@@ -6,7 +6,7 @@ from transformers import Qwen2_5_VLForConditionalGeneration
 from mmengine.config import read_base
 
 with read_base():
-    from ..datasets.qwen25vl_2b_448.processors import \
+    from ..datasets.qwen25vl_1_6b_448.processors import \
         prompt_template, tokenizer, qwen2_5_vl_model_name_or_path, image_size
 
 dcae_path = "mit-han-lab/dc-ae-f32c32-sana-1.1-diffusers"

@@ -113,8 +113,8 @@ def load_model(CONFIG_PATH, model_path):
 def main():
     # Parameter settings
     ###############VGT Qwen2.5VL########################
-    # CPKT_PATH = "ckpts/hustvl/vgt_qwen25vl_2B_sft/iter_5000.pth"
-    # CONFIG = "configs/VGT_qwen2_5vl/vgt_qwen2_5vl_2B_448px.py"
+    # CPKT_PATH = "ckpts/hustvl/vgt_qwen25vl_1_6B_sft/iter_5000.pth"
+    # CONFIG = "configs/models/vgt_qwen25vl_1_6B_448px.py"
 
     ###############VGT InterVL3########################
     CPKT_PATH = "/path/to/VGT/ckpts/vgt_internvl3_1_6B_sft/iter_5000.pth"
