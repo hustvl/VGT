@@ -60,13 +60,13 @@ class EMAHook_fix(Hook):
         # enabled at 0 iteration.
         self.enabled_by_epoch = self.begin_epoch > 0
 
-    # 新增：懒初始化方法，确保在任意生命周期中都可安全获取 ema_model/src_model
+    # Lazily initialize the EMA model so it is safe to access at any lifecycle stage.
     def _ensure_ema_model_initialized(self, runner) -> None:
         model = runner.model
         if is_model_wrapper(model):
             model = model.module
         self.src_model = model
-        # 仅在未初始化时构建 ema_model，避免覆盖已加载的权重
+        # Only build the EMA model once to avoid overwriting restored weights.
         if not hasattr(self, 'ema_model') or self.ema_model is None:
             self.ema_model = MODELS.build(self.ema_cfg, default_args=dict(model=self.src_model))
 
@@ -76,7 +76,7 @@ class EMAHook_fix(Hook):
         Args:
             runner (Runner): The runner of the training process.
         """
-        # 使用懒初始化，避免在 after_load_checkpoint 已创建并加载权重后被覆盖
+        # Use lazy initialization so restored EMA weights are not overwritten.
         self._ensure_ema_model_initialized(runner)
 
     def before_train(self, runner) -> None:
@@ -167,7 +167,7 @@ class EMAHook_fix(Hook):
         Args:
             runner (Runner): The runner of the testing process.
         """
-        # 确保 ema 已初始化
+        # Make sure the EMA model has been initialized.
         self._ensure_ema_model_initialized(runner)
         checkpoint['ema_state_dict'] = self.ema_model.state_dict()
         # Save ema parameters to the source model's state dict so that we
@@ -183,7 +183,7 @@ class EMAHook_fix(Hook):
         Args:
             runner (Runner): The runner of the testing process.
         """
-        # 确保 ema_model 在此阶段已构建，避免 AttributeError
+        # Make sure the EMA model exists at this stage to avoid AttributeError.
         self._ensure_ema_model_initialized(runner)
         from mmengine.runner.checkpoint import load_state_dict
         if 'ema_state_dict' in checkpoint and runner._resume:

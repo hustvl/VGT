@@ -13,7 +13,7 @@ def modulate(x, shift, scale=None):
     return x * (1 + scale) + shift
 
 def build_mlp(hidden_size, projector_dim, z_dim):
-    """构建REPA投影头MLP"""
+    """Build the REPA projection MLP."""
     return nn.Sequential(
         nn.Linear(hidden_size, projector_dim),
         nn.SiLU(),
@@ -95,7 +95,7 @@ class FinalLayer(nn.Module):
 
 class SimpleMLPAdaLN(nn.Module):
     def __init__(self, input_dim, cond_dim, dim=1536, layers=12, mlp_ratio=1.0,
-                 # REPA参数 - 简化版本
+                 # Simplified REPA parameters.
                  enable_repa=False, repa_encoder_depth=6, dinov3_feature_dim=768):
         super().__init__()
         self.input_dim = input_dim
@@ -104,7 +104,7 @@ class SimpleMLPAdaLN(nn.Module):
         self.layers = layers
         self.mlp_ratio = mlp_ratio
         
-        # REPA参数 - 简化版本
+        # Simplified REPA parameters.
         self.enable_repa = enable_repa
         self.repa_encoder_depth = repa_encoder_depth
         self.dinov3_feature_dim = dinov3_feature_dim
@@ -117,9 +117,9 @@ class SimpleMLPAdaLN(nn.Module):
             res_blocks.append(ResBlock(dim, mlp_ratio))
         self.res_blocks = nn.ModuleList(res_blocks)
 
-        # REPA投影头（如果启用）
+        # Optional REPA projection head.
         if enable_repa:
-            # 固定投影头配置：hidden_dim -> 2048 -> dinov3_feature_dim
+            # Fixed projector layout: hidden_dim -> 2048 -> dinov3_feature_dim.
             self.repa_projector = build_mlp(dim, 2048, dinov3_feature_dim)
         else:
             self.repa_projector = None
@@ -160,8 +160,8 @@ class SimpleMLPAdaLN(nn.Module):
         c.shape = (bsz, cond_dim)
         
         Returns:
-            output: (bsz, input_dim) 预测输出
-            repa_features: List[(bsz, feature_dim)] REPA特征（如果启用）
+            output: (bsz, input_dim) Predicted output.
+            repa_features: List[(bsz, feature_dim)] REPA features if enabled.
         """
 
         x = self.input_proj(x)
@@ -177,7 +177,7 @@ class SimpleMLPAdaLN(nn.Module):
             else:
                 x = block(x, y)
             
-            # 在指定深度提取REPA特征
+            # Extract REPA features at the configured depth.
             if self.enable_repa and (i + 1) == self.repa_encoder_depth:
                 repa_features = self.repa_projector(x)  # (bsz, dinov3_feature_dim)
 
@@ -200,22 +200,22 @@ def expand_t(t, x):
 
 def randn_tensor(shape, noise_repeat, device):
     """Generate random tensor with noise repeat"""
-    #这里输入shape是真实样本数量(bsz*seq, dim)，bsz*seq是一整个图像 token，直接全部都随机
+    # The input shape is the flattened sample count (bsz * seq, dim); sample noise directly for all image tokens.
     return torch.randn(shape, device=device)
-# 新增：时间重分布函数（偏向 t≈0 噪声端）
+# Time redistribution function that biases sampling toward the noisy t≈0 side.
 def time_shift_fn(t: torch.Tensor, shift: float = 1.0) -> torch.Tensor:
-    # 等价于 t' = t / (t + (1 - t) * shift)，shift>=1时偏向小t
+    # Equivalent to t' = t / (t + (1 - t) * shift); shift >= 1 biases toward smaller t.
     return t / (t + (1.0 - t) * shift)
 
 def time_shift_forward(t: torch.Tensor, shift: float = 1.0) -> torch.Tensor:
-    # shift >= 1 时偏向大 t
+    # shift >= 1 biases toward larger t.
     return 1.0 - t / (t + (1.0 - t) * shift)
 
 def time_shift_fn_rae(t: torch.Tensor, shift: float = 1.0) -> torch.Tensor:
-    # 等价于 t' = t / (t + (1 - t) * shift)，shift>=1时偏向小t
+    # Equivalent to t' = t / (t + (1 - t) * shift); shift >= 1 biases toward smaller t.
     return 1 - shift * t / (1 + (shift - 1) * t)
 
-# 新增：DDT Final 层（宽浅解码头的最终线性输出）
+# Final layer for the wide-and-shallow DDT decoder head.
 class DDTFinalLayer(nn.Module):
     def __init__(self, model_channels: int, out_channels: int):
         super().__init__()
@@ -228,7 +228,7 @@ class DDTFinalLayer(nn.Module):
         x = modulate(self.norm_final(x), shift, scale)
         x = self.linear(x)
         return x
-# 新增：带 DDT 宽浅解码分支的 MLP-AdaLN
+# MLP-AdaLN with an additional wide-and-shallow DDT decoding branch.
 class SimpleMLPDDT(nn.Module):
     def __init__(
         self,
@@ -255,19 +255,19 @@ class SimpleMLPDDT(nn.Module):
         self.enable_repa = enable_repa
         self.repa_encoder_depth = repa_encoder_depth
         self.dinov3_feature_dim = dinov3_feature_dim
-        # 编码侧
+        # Encoder branch.
         self.time_embed = TimestepEmbedder(enc_dim)
         self.cond_embed = nn.Linear(cond_dim, enc_dim)
         self.input_proj = nn.Linear(input_dim, enc_dim)
         self.enc_blocks = nn.ModuleList([ResBlock(enc_dim, mlp_ratio) for _ in range(enc_layers)])
 
-        # REPA 投影（可选）
+        # Optional REPA projection.
         if enable_repa:
             self.repa_projector = build_mlp(enc_dim, 2048, dinov3_feature_dim)
         else:
             self.repa_projector = None
 
-        # 解码侧（宽浅头）
+        # Decoder branch (wide shallow head).
         self.s_projector = nn.Linear(enc_dim, dec_dim) if enc_dim != dec_dim else nn.Identity()
         self.dec_blocks = nn.ModuleList([ResBlock(dec_dim, mlp_ratio) for _ in range(dec_layers)])
         self.final_layer = DDTFinalLayer(dec_dim, input_dim)
@@ -284,18 +284,18 @@ class SimpleMLPDDT(nn.Module):
 
         nn.init.normal_(self.time_embed.mlp[0].weight, std=0.02)
         nn.init.normal_(self.time_embed.mlp[2].weight, std=0.02)
-        # Zero-out 编码侧 AdaLN
+        # Zero-out encoder-side AdaLN.
         for block in self.enc_blocks:
             nn.init.constant_(block.adaLN_modulation[-1].weight, 0)
             nn.init.constant_(block.adaLN_modulation[-1].bias, 0)
 
-        # Zero-out 解码侧最终层
+        # Zero-out the decoder-side final layer.
         nn.init.constant_(self.final_layer.adaLN_modulation[-1].weight, 0)
         nn.init.constant_(self.final_layer.adaLN_modulation[-1].bias, 0)
         nn.init.constant_(self.final_layer.linear.weight, 0)
         nn.init.constant_(self.final_layer.linear.bias, 0)
     def forward(self, x, t, c):
-        # 编码侧
+        # Encoder branch.
         x = self.input_proj(x)           # [B, enc_dim]
         t_enc = self.time_embed(t)       # [B, enc_dim]
         c_enc = self.cond_embed(c)       # [B, enc_dim]
@@ -310,16 +310,16 @@ class SimpleMLPDDT(nn.Module):
             if self.enable_repa and (i + 1) == self.repa_encoder_depth:
                 repa_features = self.repa_projector(x)
 
-        # 解码侧：将编码输出与时间条件融合，并投到更宽的解码维度
+        # Decoder branch: fuse encoder outputs with time conditioning and project to a wider decode dimension.
         s = torch.nn.functional.silu(t_enc + x)   # [B, enc_dim]
         s = self.s_projector(s)                   # [B, dec_dim]
 
-        # 修复点：使用前一层输出作为下一层输入，避免丢弃 dec_blocks[0] 的贡献
+        # Feed the previous layer output into the next block so the first decoder block is not bypassed.
         x_dec = s
         for block in self.dec_blocks:
             x_dec = block(x_dec, s)
 
-        # 最终输出
+        # Final prediction.
         output = self.final_layer(x_dec, s)
         if self.enable_repa and self.training:
             return output, repa_features
@@ -328,7 +328,7 @@ class SimpleMLPDDT(nn.Module):
 
 class FlowMatchingHead(nn.Module):
     def __init__(self, input_dim, cond_dim, dim=1536, layers=12, mlp_ratio=1.0, sample_t="logit-normal", timeshift=None,
-                 # REPA参数 - 简化版本
+                 # Simplified REPA parameters.
                  enable_repa=False, repa_encoder_depth=6, dinov3_feature_dim=768):
         super(FlowMatchingHead, self).__init__()
         self.input_dim = input_dim
@@ -374,7 +374,7 @@ class FlowMatchingHead(nn.Module):
         target.shape = (bsz, input_dim)
         c.shape      = (bsz, cond_dim)
         mask.shape   = (bsz,)
-        keep_dim     = 是否保留非 batch 维度 (默认 False)
+        keep_dim     = Whether to preserve non-batch dimensions (default: False)
         """
         noise = torch.randn_like(target)
 
@@ -383,7 +383,7 @@ class FlowMatchingHead(nn.Module):
             u = torch.normal(mean=0.0, std=1.0, size=(len(target),))
             t = (1 / (1 + torch.exp(-u))).to(target)
 
-            # 应用时间偏置
+            # Apply a time-dependent bias.
             if self.timeshift is not None:
                 t = time_shift_fn_rae(t, self.timeshift)
         elif self.sample_t == "auto":
@@ -404,11 +404,11 @@ class FlowMatchingHead(nn.Module):
             
         loss = (model_output.float() - ut.float()) ** 2
         if not keep_dim:
-            # 默认行为：对所有非 batch 维度做平均
+            # Default behavior: average across all non-batch dimensions.
             loss = torch.mean(loss, dim=list(range(1, len(loss.size()))))
 
         if mask is not None:
-            # 按 mask 加权平均
+            # Compute the mask-weighted average.
             loss = (loss * mask).sum() / (mask.sum() + 1e-8)
         else:
             loss = loss.mean() if not keep_dim else loss
@@ -475,7 +475,7 @@ class FlowMatchingHead(nn.Module):
         timestep_pairs = zip(timesteps[:-1], timesteps[1:])
         if progress:
             from tqdm.auto import tqdm
-            # 计算总迭代次数（timesteps长度减1）
+            # Total number of iterations equals len(timesteps) - 1.
             total = len(timesteps) - 1 if hasattr(timesteps, '__len__') else None
             timestep_pairs = tqdm(timestep_pairs, total=total, desc="Processing flow matching")
             
@@ -539,7 +539,7 @@ class FlowMatchingHead(nn.Module):
         xs = []
 
         sigmas = torch.linspace(0, 1, num_sampling_steps + 1, device=device, dtype=dtype)[:-1]
-        # 修改：采样 sigma 网格用与训练一致的 time_shift_fn
+        # Sample the sigma grid with the same time_shift_fn used during training.
         if timesteps_shift is not None and timesteps_shift > 1.0:
             sigmas = time_shift_fn(sigmas, timesteps_shift)
 

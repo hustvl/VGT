@@ -62,7 +62,7 @@ def parse_args():
 #         result = self.pipeline_vqa(input_vqa)
 #         return result['text']
 class MPLUG(torch.nn.Module):
-    def __init__(self, ckpt='/mmu-vcg-hdd/zhangshenhui/mplug_visual-question-answering_coco_large_en', device_index=0):
+    def __init__(self, ckpt='damo/mplug_visual-question-answering_coco_large_en', device_index=0):
         super().__init__()
         from modelscope.pipelines import pipeline
         from modelscope.utils.constant import Tasks

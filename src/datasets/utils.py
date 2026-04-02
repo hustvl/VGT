@@ -19,26 +19,26 @@ def pad_input_ids(
     padding_mode: str = "left"
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
-    对一批 input_ids 执行 padding，返回 (padded_input_ids, attention_mask)
+    Pad a batch of ``input_ids`` and return ``(padded_input_ids, attention_mask)``.
 
     Args:
-        input_ids (List[Tensor]): 每个样本的 token id 张量，形状 [seq_len]
-        batch_first (bool): 是否 batch 维在前，默认 True => [B, T]
-        padding_value (int): padding 的填充值（例如 pad_token_id）
-        padding_mode (str): 'left' 或 'right'，决定填充方向
+        input_ids (List[Tensor]): Token ID tensors with shape ``[seq_len]``.
+        batch_first (bool): Whether to use ``[B, T]`` layout. Defaults to ``True``.
+        padding_value (int): Value used for padding, e.g. ``pad_token_id``.
+        padding_mode (str): ``'left'`` or ``'right'``.
 
     Returns:
         Tuple[Tensor, Tensor]:
-            - padded_input_ids: [B, T] 或 [T, B]
-            - attention_mask: 同形状，padding 为 False，其余为 True
+            - padded_input_ids: ``[B, T]`` or ``[T, B]``
+            - attention_mask: same shape, with ``False`` on padding positions
     """
 
-    # 校验输入
+    # Validate inputs.
     if len(input_ids) == 0:
-        raise ValueError("input_ids 不能为空")
+        raise ValueError("input_ids must not be empty")
 
     if padding_mode not in ("left", "right"):
-        raise ValueError(f"padding_mode 必须是 'left' 或 'right'，但得到 {padding_mode}")
+        raise ValueError(f"padding_mode must be 'left' or 'right', but got {padding_mode}")
 
     max_len = max(x.size(0) for x in input_ids)
 

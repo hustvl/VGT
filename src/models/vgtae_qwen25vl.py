@@ -52,7 +52,7 @@ def disable_dropout(model):
 
 
 class ResBlock(nn.Module):
-    """残差块，用于特征变换"""
+    """Residual block used for feature transformation."""
     
     def __init__(self, channels):
         super().__init__()
@@ -157,22 +157,22 @@ class VGTAE_Qwen25VL(nn.Module):
         dc_ae = AutoencoderDC.from_pretrained(dc_ae_path, torch_dtype=torch.float32)
         self.decoder = dc_ae.decoder
         
-        # 注册归一化参数
+        # Register normalization statistics.
         self.register_buffer('vit_mean', torch.tensor(IMAGENET_MEAN), persistent=False)
         self.register_buffer('vit_std', torch.tensor(IMAGENET_STD), persistent=False)
         
-        # 优化内存格式
+        # Optimize memory format for convolution-heavy decoding.
         for name, param in self.decoder.named_parameters():
             if len(param.data.shape) == 4:
                 param.data = param.data.to(memory_format=torch.channels_last)
         
-        # 初始化权重
+        # Initialize newly introduced weights.
         self._init_weights()
         
-        # 清理临时变量
+        # Release temporary variables.
         del model, dc_ae
         
-        # 4. 加载checkpoint
+        # 4. Load the checkpoint if provided.
         if checkpoint_path:
             self.load_checkpoint(checkpoint_path)
         
@@ -195,7 +195,7 @@ class VGTAE_Qwen25VL(nn.Module):
         print(f"Loading checkpoint from {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path, map_location="cpu")
         
-        # 处理可能的key前缀
+        # Handle possible checkpoint key prefixes.
         state_dict = checkpoint
         if 'state_dict' in checkpoint:
             state_dict = checkpoint['state_dict']
@@ -215,13 +215,13 @@ class VGTAE_Qwen25VL(nn.Module):
         spatial_merge_size = self.vision_config.spatial_merge_size
         temporal_patch_size = self.vision_config.temporal_patch_size
 
-        # 扩展时间维度
+        # Expand the temporal dimension.
         pixel_values = pixel_values[:, None].expand(b, temporal_patch_size, c, h, w)
 
         grid_t = 1
         grid_h, grid_w = h // patch_size, w // patch_size
 
-        # 重排为patches
+        # Rearrange inputs into patches.
         pixel_values = pixel_values.view(
             b,
             grid_t,
@@ -240,7 +240,7 @@ class VGTAE_Qwen25VL(nn.Module):
 
         image_grid_thw = torch.tensor([(grid_t, grid_h, grid_w)] * b).to(device).long()
 
-        # 编码
+        # Encode visual features.
         image_embeds = self.encoder(pixel_values, grid_thw=image_grid_thw)
         image_embeds = rearrange(image_embeds, '(b l) d -> b l d', b=b)
 
@@ -309,14 +309,14 @@ class VGTAE_Qwen25VL(nn.Module):
         Returns:
             images: [B, 3, H*stride, W*stride] reconstructed images, range [-1, 1]
         """
-        # 反缩放
+        # Undo latent scaling.
         latents = (latents - self.shift_embeding) / self.scale_embeding
         
-        # DC-AE 解码
+        # Decode with DC-AE.
         B, C, H, W = latents.shape
         decoded = self.decoder(latents)
         
-        # 插值到目标尺寸
+        # Resize to the target resolution.
         target_size = (H * self.stride, W * self.stride)
         decoded = F.interpolate(decoded, size=target_size, mode='bilinear', align_corners=False)
         

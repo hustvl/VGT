@@ -7,7 +7,7 @@
 
 **_Unleashing Visual Generation Capabilities from Any Pretrained VLM_**
 
-**GenEval 0.83 | DPG-Bench 81.28 | 20× Faster Convergence**
+**GenEval 0.82 | DPG-Bench 81.28 | 20× Faster Convergence**
 
 Jiahao Guo¹ ⁴*, Sinan Du² ⁴*, Jingfeng Yao¹, Wenyu Liu¹, Bo Li⁴, Haoxiang Cao³ ⁴,  
 Kun Gai⁴, Chun Yuan², Kai Wu⁴†, Xinggang Wang¹✉
@@ -45,7 +45,7 @@ Kun Gai⁴, Chun Yuan², Kai Wu⁴†, Xinggang Wang¹✉
 
 - **🎯 Novel Paradigm**: Transform ANY pretrained Vision-Language Model into a powerful image generator through efficient visual generation tuning
 - **⚡ 20× Speedup**: Achieve dramatically faster convergence compared to vanilla VAE-based autoregressive models
-- **📊 SOTA Performance**: GenEval **0.83** and DPG-Bench **81.28** with minimal training data
+- **📊 SOTA Performance**: GenEval **0.82** and DPG-Bench **81.28** with minimal training data
 - **🚀 Extreme Data Efficiency**: Reach GenEval 0.55 in just 10K iterations, 0.60 in 30K iterations
 - **🔄 Parallel Inference**: QueryAR mechanism enables 16× parallel decoding while maintaining high-quality generation
 - **🎨 Superior Reconstruction**: 26.67 PSNR and 0.50 rFID at 28× compression ratio, outperforming specialized VAEs
@@ -107,7 +107,7 @@ The structured semantic representations learned by pretrained VLMs are inherentl
 </div>
 
 **Highlights**: 
-- 🏆 **SOTA among autoregressive models** with GenEval **0.83** and DPG-Bench **81.28**
+- 🏆 **SOTA among autoregressive models** with GenEval **0.82** and DPG-Bench **81.28**
 - 🎯 **Extreme data efficiency**: Trained on only **<25M samples** (vs. 198M-2048M+ for competitors)
 - ⚡ **Competitive with diffusion models** despite using far less data and compute
 
@@ -174,7 +174,7 @@ We provide VGT-tuned models based on Qwen2.5-VL and InternVL3 (448px):
 | Model | Base Model | GenEval | DPG-Bench | Download |
 |:------|:-----------|:-------:|:---------:|:--------:|
 | VGT-InternVL3-1.6B-Pretrain | InternVL3-1.6B | 0.58 | 73.05 | [🤗 HuggingFace](https://huggingface.co/hustvl/vgt_internvl3_1_6B_pretrain) |
-| VGT-InternVL3-1.6B-SFT | InternVL3-1.6B | 0.83 | 76.33 | [🤗 HuggingFace](https://huggingface.co/hustvl/vgt_internvl3_1_6B_sft) |
+| VGT-InternVL3-1.6B-SFT | InternVL3-1.6B | 0.82 | 76.33 | [🤗 HuggingFace](https://huggingface.co/hustvl/vgt_internvl3_1_6B_sft) |
 | VGT-Qwen2.5-VL-2B-Pretrain | Qwen2.5-VL-2B | 0.63 | 78.02 | [🤗 HuggingFace](https://huggingface.co/hustvl/vgt_qwen25vl_2B_pretrain) |
 | VGT-Qwen2.5-VL-2B-SFT | Qwen2.5-VL-2B | 0.83 | 81.28 | [🤗 HuggingFace](https://huggingface.co/hustvl/vgt_qwen25vl_2B_sft) |
 

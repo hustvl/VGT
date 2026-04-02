@@ -20,7 +20,7 @@ def autopad(k, p=None, d=1):
 class Conv(nn.Module):
     """Standard convolution: Conv2d + BatchNorm2d + SiLU"""
 
-    default_act = nn.SiLU()  # YOLO 默认激活
+    default_act = nn.SiLU()  # Default YOLO activation.
 
     def __init__(self, c1, c2, k=1, s=1, p=None, g=1, d=1, act=True):
         """
@@ -87,7 +87,7 @@ class Bottleneck(nn.Module):
 # LocalBlock: simple local refine (Conv + residual)
 # ============================
 class LocalBlock(nn.Module):
-    """3×3 Conv + BN + SiLU + residual (轻量、局部增强)"""
+    """3x3 Conv + BN + SiLU + residual for lightweight local enhancement."""
 
     def __init__(self, dim):
         super().__init__()
@@ -98,8 +98,8 @@ class LocalBlock(nn.Module):
 
 
 # ============================
-# YOLO C2f 模块（保持 YOLO 结构哲学）
-# 输入输出均为 [B, C, H, W]
+# YOLO-style C2f block.
+# Input and output tensors both use [B, C, H, W].
 # ============================
 class C2fBlock(nn.Module):
     """
@@ -113,29 +113,29 @@ class C2fBlock(nn.Module):
     def __init__(self, dim, n=2):
         """
         Args:
-            dim (int): 输入/输出通道一致
-            n (int): LocalBlock 的数量（相当于 YOLO 中的 Bottleneck 数量）
+            dim (int): Shared input/output channel width.
+            n (int): Number of LocalBlock modules, analogous to YOLO bottlenecks.
         """
         super().__init__()
-        hidden = dim // 2              # C2f 思想：拆分通道
+        hidden = dim // 2              # C2f-style channel split.
         self.cv1 = Conv(dim, hidden * 2, k=1)
 
-        # n 个 LocalBlock，全部保持 hidden 通道
+        # Stack n LocalBlock modules, all operating on the hidden width.
         self.blocks = nn.ModuleList(LocalBlock(hidden) for _ in range(n))
 
-        # concat 通道为 (2+n)*hidden，再 fuse 回 dim
+        # Concatenate to (2 + n) * hidden channels, then fuse back to dim.
         self.cv2 = Conv((2 + n) * hidden, dim, k=1)
 
     def forward(self, x):
-        # Step1: 1×1 conv → split channel
+        # Step 1: 1x1 convolution followed by channel split.
         y1, y2 = self.cv1(x).chunk(2, dim=1)
 
         outs = [y1, y2]
 
-        # Step2: y2 逐层经过 LocalBlock
+        # Step 2: pass y2 through the LocalBlock stack.
         for block in self.blocks:
             y2 = block(y2)
             outs.append(y2)
 
-        # Step3: concat → fuse conv
+        # Step 3: concatenate and fuse.
         return self.cv2(torch.cat(outs, dim=1))
