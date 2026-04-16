@@ -40,7 +40,7 @@ model = dict(
         checkpoint_path = "ckpts/vgt_ae/vgt_ae_qwen25vl.pth",
         encoder_norm=True,
     ),
-
+    layer_ratio = 0.5,
     # Tokenizer and prompt
     tokenizer=tokenizer,
     prompt_template=prompt_template,
