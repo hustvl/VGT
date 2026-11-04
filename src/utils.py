@@ -103,7 +103,7 @@ def load_checkpoint_with_ema(model, checkpoint_path, use_ema=True, map_location=
     if logger is None:
         logger = MMLogger.get_instance(name='load_checkpoint', log_level='INFO')
     
-    checkpoint = torch.load(checkpoint_path, map_location=map_location)
+    checkpoint = torch.load(checkpoint_path, map_location=map_location, weights_only=True)
     
     # Prioritize EMA weights
     if use_ema and 'ema_state_dict' in checkpoint:
